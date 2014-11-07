@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Kwf\Deploy\ExcludeFinder;
 
 class RsyncCommand extends Command
@@ -29,23 +30,24 @@ class RsyncCommand extends Command
     {
         $serverSection = $input->getOption('server');
 
-        $config = parse_ini_file('config.ini', true);
-        if (!isset($config[$serverSection])) {
-            throw new \Exception("Invalid server: '$serverSection' section not found in config.ini");
+        $config = new \Zend_Config_Ini('config.ini', $serverSection);
+        $server = $config->server;
+
+        $remote = $server->user.'@'.$server->host.($server->port ? ':'.$server->port:'').$server->dir;
+
+        $output->writeln("This will upload the current working copy to $remote.");
+        $output->writeln("All files will be overwritten, any changes will be lost.");
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion('Continue with this action? [Y/n]', true);
+        if (!$helper->ask($input, $output, $question)) {
+            return;
         }
-        var_dump($config[$serverSection]['server.user']);
-        var_dump($config[$serverSection]['server.host']);
-        var_dump($config[$serverSection]['server.port']);
-        var_dump($config[$serverSection]['server.dir']);
-
-//         if ($input->getOption('yell')) {
-
         $excludes = ExcludeFinder::findExcludes('.');
         $excludeArgs = '';
         foreach ($excludes as $i) {
             $excludeArgs .= " --exclude=".escapeshellarg($i);
         }
-        $cmd = "rsync -avpz $excludeArgs . ../deploy ";
+        $cmd = "rsync -avpz $excludeArgs . $remote";
         $this->_systemCheckRet($cmd, $input, $output);
 
         $output->writeln($cmd);
