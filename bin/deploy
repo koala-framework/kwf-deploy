@@ -1,0 +1,14 @@
+#!/usr/bin/env php
+<?php
+require __DIR__.'/../vendor/autoload.php';
+
+use Kwf\Deploy\RsyncCommand;
+use Kwf\Deploy\CreateArchiveCommand;
+use Kwf\Deploy\ShellCommand;
+use Symfony\Component\Console\Application;
+
+$application = new Application('kwf-deploy', '0.1');
+$application->add(new RsyncCommand);
+$application->add(new CreateArchiveCommand);
+$application->add(new ShellCommand);
+$application->run();
