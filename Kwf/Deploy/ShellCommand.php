@@ -28,26 +28,23 @@ class ShellCommand extends Command
     {
         $serverSection = $input->getOption('server');
 
-        $config = parse_ini_file('config.ini', true);
-        if (!isset($config[$serverSection])) {
-            throw new \Exception("Invalid server: '$serverSection' section not found in config.ini");
-        }
-        $config = $config[$serverSection];
+        $config = new \Zend_Config_Ini('config.ini', $serverSection);
+        $server = $config->server;
 
-        if (!isset($config['server.host'])) {
-            throw new \Exception("Invalid server settings for section '$serverSection': server.host is required");
+        if (!isset($server->host)) {
+            throw new \Exception("Invalid server settings for section '$serverSection': host is required");
         }
 
-        if (isset($config['server.user'])) {
-            $host = $config['server.user'].'@'.$config['server.host'];
+        if (isset($server->user)) {
+            $host = $server->user.'@'.$server->host;
         } else {
-            $host = $config['server.host'];
+            $host = $server->host;
         }
-        if (isset($config['server.port'])) {
-            $host .= ' -p '.$config['server.port'];
+        if (isset($server->port)) {
+            $host .= ' -p '.$server->port;
         }
-        if (isset($config['server.dir'])) {
-            $cmd = "cd ".$config['server.dir'].';';
+        if (isset($server->dir)) {
+            $cmd = "cd ".$server->dir.';';
         }
 
         $gitEnvVars = "GIT_AUTHOR_NAME=".escapeshellarg(isset($_ENV['GIT_AUTHOR_NAME']) ? $_ENV['GIT_AUTHOR_NAME'] : trim(`git config user.name`)).
