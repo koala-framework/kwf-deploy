@@ -23,6 +23,12 @@ class RsyncCommand extends Command
                 'Server (section) to deploy to',
                 'production'
             )
+            ->addOption(
+               'dry-run',
+               null,
+               InputOption::VALUE_NONE,
+                'Server (section) to deploy to'
+            )
         ;
     }
 
@@ -33,24 +39,28 @@ class RsyncCommand extends Command
         $config = new \Zend_Config_Ini('config.ini', $serverSection);
         $server = $config->server;
 
-        $remote = $server->user.'@'.$server->host.($server->port ? ':'.$server->port:'').$server->dir;
+        $remote = $server->user.'@'.$server->host.($server->port ? ':'.$server->port:'').':'.$server->dir;
 
-        $output->writeln("This will upload the current working copy to $remote.");
-        $output->writeln("All files will be overwritten, any changes will be lost.");
-        $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('Continue with this action? [Y/n]', true);
-        if (!$helper->ask($input, $output, $question)) {
-            return;
+        if (!$input->getOption('dry-run')) {
+            $output->writeln("This will upload the current working copy to $remote.");
+            $output->writeln("All files will be overwritten, any changes will be lost.");
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion('Continue with this action? [Y/n]', true);
+            if (!$helper->ask($input, $output, $question)) {
+                return;
+            }
         }
         $excludes = ExcludeFinder::findExcludes('.');
         $excludeArgs = '';
         foreach ($excludes as $i) {
             $excludeArgs .= " --exclude=".escapeshellarg($i);
         }
-        $cmd = "rsync -avpz $excludeArgs . $remote";
+        $cmd = "rsync -avpz --delete ";
+        if ($input->getOption('dry-run')) {
+            $cmd .= "--dry-run ";
+        }
+        $cmd .= "$excludeArgs . $remote";
         $this->_systemCheckRet($cmd, $input, $output);
-
-        $output->writeln($cmd);
     }
 
     private function _systemCheckRet($cmd, InputInterface $input, OutputInterface $output)
@@ -59,7 +69,7 @@ class RsyncCommand extends Command
         if ($output->isDebug()) {
             $output->writeln($cmd);
         }
-        //passthru($cmd, $ret);
+        passthru($cmd, $ret);
         if ($ret != 0) {
             throw new \Exception("command failed");
         }
