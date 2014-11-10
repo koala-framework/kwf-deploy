@@ -16,7 +16,6 @@ class ExcludeFinder
         'doc',
         'docs',
         'docs_src',
-        'examples',
     );
     public static $gitignorewhiteList = array(
         'vendor', 'build'
