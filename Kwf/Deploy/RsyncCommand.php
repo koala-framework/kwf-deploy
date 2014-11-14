@@ -39,7 +39,7 @@ class RsyncCommand extends Command
         $config = new \Zend_Config_Ini('config.ini', $serverSection);
         $server = $config->server;
 
-        $remote = $server->user.'@'.$server->host.($server->port ? ':'.$server->port:'').':'.$server->dir;
+        $remote = ($server->port ? '-e "ssh -p '.$server->port.'" ':'') . $server->user.'@'.$server->host.':'.$server->dir;
 
         if (!$input->getOption('dry-run')) {
             $output->writeln("This will upload the current working copy to $remote.");
