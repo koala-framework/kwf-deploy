@@ -43,7 +43,8 @@ class RsyncCommand extends Command
 
         if (!$input->getOption('dry-run')) {
             $output->writeln("This will upload the current working copy to $remote.");
-            $output->writeln("All files will be overwritten, any changes will be lost.");
+            $output->writeln("All files will be overwritten, any changes will be lost. Online directories you don't have locally not matching a .gitignore pattern will be deleted.");
+            $output->writeln("Make sure your local application is stable and build is up to date.");
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion('Continue with this action? [Y/n]', true);
             if (!$helper->ask($input, $output, $question)) {
@@ -55,12 +56,20 @@ class RsyncCommand extends Command
         foreach ($excludes as $i) {
             $excludeArgs .= " --exclude=".escapeshellarg($i);
         }
-        $cmd = "rsync -avpz --delete ";
+        $cmd = "rsync -apz --delete --progress --verbose ";
         if ($input->getOption('dry-run')) {
             $cmd .= "--dry-run ";
         }
         $cmd .= "$excludeArgs . $remote";
         $this->_systemCheckRet($cmd, $input, $output);
+
+        if (!$input->getOption('dry-run')) {
+            $output->writeln("Upload finished. Now executing update scripts and clearing caches.");
+            $cmd = "cd $server->dir && ".$server->phpCli ? $server->phpCli : 'php'." bootstrap.php update";
+            $remote = ($server->port ? '-p '.$server->port.' ':'') . $server->user.'@'.$server->host;
+            $cmd = "ssh $remote ".escapeshellarg($cmd);
+            $this->_systemCheckRet($cmd, $input, $output);
+        }
     }
 
     private function _systemCheckRet($cmd, InputInterface $input, OutputInterface $output)
