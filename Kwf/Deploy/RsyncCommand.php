@@ -65,7 +65,7 @@ class RsyncCommand extends Command
 
         if (!$input->getOption('dry-run')) {
             $output->writeln("Upload finished. Now executing update scripts and clearing caches.");
-            $cmd = "cd $server->dir && ".$server->phpCli ? $server->phpCli : 'php'." bootstrap.php update";
+            $cmd = "cd $server->dir && ".($server->phpCli ? $server->phpCli : 'php')." bootstrap.php update";
             $remote = ($server->port ? '-p '.$server->port.' ':'') . $server->user.'@'.$server->host;
             $cmd = "ssh $remote ".escapeshellarg($cmd);
             $this->_systemCheckRet($cmd, $input, $output);
