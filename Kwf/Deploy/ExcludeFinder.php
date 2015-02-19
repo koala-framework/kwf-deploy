@@ -21,7 +21,7 @@ class ExcludeFinder
         'vendor', 'build'
     );
     public static $additionalExcludes = array(
-        'deploy.tar.gz', 'config_section', 'config.local.ini'
+        'deploy.zip', 'config_section', 'config.local.ini'
     );
 
     public static function findExcludes($directory)

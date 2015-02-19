@@ -28,13 +28,13 @@ class CreateArchiveCommand extends Command
         $excludes = ExcludeFinder::findExcludes('.');
         $excludeArgs = '';
         foreach ($excludes as $i) {
-            $excludeArgs .= " --exclude=".escapeshellarg('./'.$i);
+            $excludeArgs .= " -x ".escapeshellarg('./'.$i.'*');
         }
-        $cmd = "tar cfz deploy.tar.gz . $excludeArgs";
-        $output->writeln("\n\ncreating deploy.tar.gz archive...");
+        $cmd = "zip deploy.zip . --quiet -r $excludeArgs";
+        $output->writeln("creating deploy.zip archive...");
         $this->_systemCheckRet($cmd, $input, $output);
 
-        $output->writeln("\ndeploy.tar.gz successfully created.");
+        $output->writeln("deploy.zip successfully created.");
     }
 
 
