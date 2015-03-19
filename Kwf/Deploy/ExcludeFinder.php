@@ -24,9 +24,58 @@ class ExcludeFinder
         'deploy.zip', 'config_section', 'config.local.ini'
     );
 
+    private static function _findExcludeBuildPackages($package, $addToBlacklist, &$blacklist, &$whitelist)
+    {
+        if ($package == '.') {
+            $composerFile = 'composer.json';
+        } else {
+            $composerFile = 'vendor/'.$package.'/composer.json';
+        }
+        if (!file_exists($composerFile)) return;
+
+        $c = json_decode(file_get_contents($composerFile), true);
+        if (isset($c['require'])) {
+            foreach ($c['require'] as $p=>$constraint) {
+                if ($p == 'php' || substr($p, 0, 4) == 'ext-') continue;
+                if ($addToBlacklist || (isset($c['extra']['kwf']['exclude-production']) && in_array($p, $c['extra']['kwf']['exclude-production']))) {
+                    //exclude from build
+                    $blacklist[] = $p;
+                    self::_findExcludeBuildPackages($p, true, $blacklist, $whitelist);
+                } else {
+                    $whitelist[] = $p;
+                    self::_findExcludeBuildPackages($p, false, $blacklist, $whitelist);
+                }
+            }
+        }
+        if ($package == '.' && isset($c['require-dev'])) {
+            foreach ($c['require-dev'] as $p=>$contraint) {
+                if ($p == 'php' || substr($p, 0, 4) == 'ext-') continue;
+                $blacklist[] = $p;
+                if ($recurse) {
+                    self::_findExcludeBuildPackages($p, true, $blacklist, $whitelist);
+                }
+            }
+        }
+    }
+
+    public static function findExcludePackages()
+    {
+        $blacklist = array();
+        $whitelist = array();
+        self::_findExcludeBuildPackages('.', false, $blacklist, $whitelist);
+        $blacklist = array_unique($blacklist);
+        $whitelist = array_unique($whitelist);
+        return array_diff($blacklist, $whitelist);
+    }
+
     public static function findExcludes($directory)
     {
         $excludes = array();
+        $excludePackages = self::findExcludePackages();
+        foreach ($excludePackages as $p) {
+            $excludes[] = 'vendor/'.$p;
+        }
+
         $it = new \RecursiveDirectoryIterator($directory);
         $it = new RecursiveFilterIgnoreParentExcludeDirsIterator($it);
         $it = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::SELF_FIRST);
@@ -41,6 +90,7 @@ class ExcludeFinder
         $it = new FilterGitIgnoreIterator($it);
         foreach ($it as $filePath => $fileInfo) {
             foreach (file($fileInfo->__toString()) as $pattern) {
+                if (substr($pattern, 0, 1) == '#') continue;
                 if (substr($pattern, 0, 1) == '!') continue;
                 if (!trim($pattern)) continue;
                 if (substr($pattern, 0, 1) == '/') $pattern = substr($pattern, 1);

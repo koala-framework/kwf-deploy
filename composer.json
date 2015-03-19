@@ -3,7 +3,8 @@
     "description": "Deployment scripts for Koala Framework based applications",
     "require": {
         "symfony/console": "2.5.6",
-        "koala-framework/zendframework1": "*"
+        "koala-framework/zendframework1": "*",
+        "symfony/finder": "*"
     },
     "license": "BSD-2-Clause",
     "authors": [
