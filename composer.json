@@ -2,9 +2,9 @@
     "name": "koala-framework/kwf-deploy",
     "description": "Deployment scripts for Koala Framework based applications",
     "require": {
-        "symfony/console": "2.5.6",
+        "symfony/console": "~2.5",
         "koala-framework/zendframework1": "*",
-        "symfony/finder": "*"
+        "symfony/finder": "~2.5"
     },
     "license": "BSD-2-Clause",
     "authors": [
