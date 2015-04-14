@@ -1,16 +1,9 @@
 # kwf-deploy
 Deploy Scripts for Koala Framework based Web Applications
 # Usage
-Clone the git repository and install the dependencies
+Add kwf-deploy to your project
 
-    git clone https://github.com/koala-framework/kwf-deploy.git
-    cd kwf-deploy
-    composer install
-
-Cd to the project, you want to deploy
-
-    cd ..
-    cd my-awesome-project
+    composer require koala-framework/kwf-deploy
 
 Make sure you have set the following variables in the production section of your config.ini
 
@@ -23,7 +16,8 @@ In case of the first deployment, the project directory has to already exist on t
 ## Test the connection
 With the shell command, we can access the server via ssh
 
-    php ../kwf-deploy/bin/deploy shell
+    php ./vendor/bin/deploy shell
 
 ## Deploy using rsync
-    php ../kwf-deploy/bin/deploy rsync
+
+    php ./vendor/bin/deploy rsync
