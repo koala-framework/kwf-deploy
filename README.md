@@ -22,6 +22,7 @@ In case of the first deployment, the project directory has to already exist on t
 
 ## Test the connection
 With the shell command, we can access the server via ssh
+
     php ../kwf-deploy/bin/deploy shell
 
 ## Deploy using rsync
