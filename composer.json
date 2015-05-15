@@ -4,7 +4,8 @@
     "require": {
         "symfony/console": "~2.5",
         "koala-framework/zendframework1": "*",
-        "symfony/finder": "~2.5"
+        "symfony/finder": "~2.5",
+        "symfony/process": "~2.5"
     },
     "license": "BSD-2-Clause",
     "authors": [

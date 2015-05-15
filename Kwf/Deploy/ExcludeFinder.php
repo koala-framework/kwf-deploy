@@ -18,7 +18,7 @@ class ExcludeFinder
         'docs_src',
     );
     public static $gitignorewhiteList = array(
-        'vendor', 'build'
+        'vendor', 'build', 'setup/initial'
     );
     public static $additionalExcludes = array(
         'deploy.zip', 'config_section', 'config.local.ini'
