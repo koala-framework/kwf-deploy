@@ -51,9 +51,7 @@ class ExcludeFinder
             foreach ($c['require-dev'] as $p=>$contraint) {
                 if ($p == 'php' || substr($p, 0, 4) == 'ext-') continue;
                 $blacklist[] = $p;
-                if ($recurse) {
-                    self::_findExcludeBuildPackages($p, true, $blacklist, $whitelist);
-                }
+                self::_findExcludeBuildPackages($p, true, $blacklist, $whitelist);
             }
         }
     }
