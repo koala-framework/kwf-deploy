@@ -87,6 +87,7 @@ class ExcludeFinder
         $it = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::SELF_FIRST);
         $it = new FilterGitIgnoreIterator($it);
         foreach ($it as $filePath => $fileInfo) {
+            if ($fileInfo->__toString() == './vendor/.gitignore') continue;
             foreach (file($fileInfo->__toString()) as $pattern) {
                 if (substr($pattern, 0, 1) == '#') continue;
                 if (substr($pattern, 0, 1) == '!') continue;
